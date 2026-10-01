@@ -1,28 +1,12 @@
-# 🧵 Threads Automation Suite (MBG - Merek Bot Gweh)
+# 🧵 Post-Holic Threads Automation
 
-A comprehensive suite of tools for automating engagement, trend hunting, and promotional activities on the Threads platform. This project integrates AI-driven content generation (Posty) and automated response systems (AwareNest).
+A comprehensive suite of tools and skills for the Hermes Agent `post-holic` profile. This repository focuses on content creation, auto-reply management, and promotional workflows for Threads accounts `@dummythingsinside` and `@butterrbutbetterr`.
 
 ## 🔗 Official Threads Accounts
 - **@dummythingsinside** — Primary automation account (Auto-reply: FULL AUTO)
 - **@butterrbutbetterr** — Secondary account (Auto-reply: MANUAL APPROVAL via Discord)
 
-## 🚀 Core Modules
-
-### 1. AwareNest (Auto-Reply Agent)
-An intelligent agent that monitors Threads posts and replies based on specific triggers and product knowledge.
-- **Tech Stack:** Playwright, Python, Zernio API.
-- **Key Feature:** Stealth browser automation to bypass Meta's bot detection.
-- **Workflow:** State Persistence → Stealth Interaction → AI Reply Generation → Submission.
-
-### 2. Posty (Trend Hunter & Content Creator)
-Automates the discovery of trending tech repositories on GitHub and transforms them into human-like Threads posts.
-- **Tech Stack:** GitHub API, Zernio API, SerpAPI.
-- **Workflow:** GitHub Trending Scan → Angle Selection → Anti-Slop Captioning → Auto-Post.
-
-### 3. Promo-In (Promotional Engine)
-Manages the distribution of promotional content and tracks engagement.
-
-## 🧠 Skills Architecture (Hermes Agent)
+## 🧠 Skills Architecture
 
 This project runs on **Hermes Agent** with a custom profile `post-holic`. The following skills orchestrate the automation:
 
@@ -121,6 +105,7 @@ Govern the entire Post-Holic workflow including:
 - **Anti-Bot Evasion:** Uses `navigator.webdriver = false` and Chromium flags to minimize detection.
 - **Human-Centric Content:** All captions follow strict "Anti-AI Slop" guidelines for high engagement.
 - **Two .env Files Must Sync:** `/root/autoreply/.env` (webhook service) and `post-holic/.env` (posting) — mismatch causes 401 on replies.
+- **Product Knowledge Verification:** All product claims must match `data/product-knowledge.md`. No hallucination allowed.
 
 ## 📁 Project Structure
 ```
@@ -129,7 +114,6 @@ Govern the entire Post-Holic workflow including:
 │   ├── zernio_hermes_autoreply.py
 │   ├── check_new_comments.py
 │   └── .env (WEBHOOK SERVICE)
-├── promo-in/               # Promotional campaign tools
 ├── data/                   # Logs, posted_repos.json, product-knowledge.md, media/
 ├── .hermes/
 │   └── profiles/post-holic/
@@ -140,16 +124,28 @@ Govern the entire Post-Holic workflow including:
 └── ROADMAP.md
 ```
 
-## 🔧 Troubleshooting Quick Reference
+## 🔧 Skill Workflows
 
-| Issue | Symptom | Fix |
-|-------|---------|-----|
-| Humanizer overuse | Content feels "AI-ish", formal | Remove `humanizer` skill from caption pipeline |
-| Links in caption | Looks like spam | Never put URLs in caption; use "komen aja nanti spill" CTA |
-| Colons/dashes in daily | Violates style guide | Enforce prompt rules; only promo gets bullets `•` |
-| Missing media | Promo post without image | Check `data/media/` before scheduling; fallback to draft |
-| Cron timeout | Job fails silently | Built-in retry (1hr); check `last_status` and `last_delivery_error` |
-| 401 on reply | Webhook returns 200 but reply fails | Sync the two `.env` files (ZERNIO_API_KEY must match) |
+### Daily Content Pipeline (`post-holic-daily-3konten`)
+```
+1. GitHub Trending Hunt → github-trending-hunter
+2. Select 2 tech repos + 1 promo product
+3. caption-generator → Generate anti-slop caption (Gen Z voice, no banned patterns)
+4. zernio-poster → Upload media + POST /api/v1/posts
+5. Save posted_repos.json, update promo-log.md
+```
+
+### Zernio Auto-Reply Flow
+```
+1. Webhook receives comment @dummythingsinside
+2. Filter: Skip own accounts, sensitive, OOC, spam, code requests
+3. Guardrails: Skip if too short without valid keyword
+4. Prompt Rules → Generate reply (Gen Z Override, anti-slop)
+5. Post-process: strip meta-text, confirm AI markers
+6. @dummythingsinside: AUTO REPLY → POST Zernio
+7. @butterrbutbetterr: MANUAL APPROVAL → Discord notification
+8. REPLY TERKIRIM KE THREADS
+```
 
 ---
 
