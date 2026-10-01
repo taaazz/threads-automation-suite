@@ -1,152 +1,132 @@
-# 🧵 Post-Holic Threads Automation
+# 🧵 Post-Holic Threads Automation Suite
 
-A comprehensive suite of tools and skills for the Hermes Agent `post-holic` profile. This repository focuses on content creation, auto-reply management, and promotional workflows for Threads accounts `@dummythingsinside` and `@butterrbutbetterr`.
+Automation engine and content workflow for Threads using Hermes Agent (Profile: `post-holic`). This project manages daily content pipelines, trend hunting, auto-replying, and promotional distribution via **Zernio API** (100% REST API, no browser automation/Playwright required).
 
 ## 🔗 Official Threads Accounts
 - **@dummythingsinside** — Primary automation account (Auto-reply: FULL AUTO)
-- **@butterrbutbetterr** — Secondary account (Auto-reply: MANUAL APPROVAL via Discord)
+- **@butterrbutbetterr** — Secondary account (Auto-reply: MANUAL APPROVAL)
 
-## 🧠 Skills Architecture
+---
 
-This project runs on **Hermes Agent** with a custom profile `post-holic`. The following skills orchestrate the automation:
+## 🛠️ Skills Dipakai (Hermes Skills Engine)
 
-### Core Skill: `post-holic`
-**File:** `.hermes/profiles/post-holic/skills/post-holic/SKILL.md`
+Sistem ini digerakkan oleh kombinasi skills bawaan di profile `post-holic`:
 
-Govern the entire Post-Holic workflow including:
-- **Daily Content Pipeline** (`post-holic-daily-pipeline`)
-- **Zernio Auto-Reply** (`zernio-auto-reply`)
-- **Product Knowledge Management**
-- **Cron Job Definitions**
+### 1. Core Workflow
+- **`post-holic`** (Main Orchestrator)
+  Mengarahkan seluruh siklus posting, jadwal, aturan bahasa Gen Z, dan manajemen product knowledge.
+- **`post-holic-daily-pipeline`**
+  Menjalankan pipeline harian: ambil trending $ightarrow$ bikin caption $ightarrow$ posting ke Threads.
 
-#### Sub-skills Used:
+### 2. Trend Hunting & Research
+- **`github-trending-hunter`**
+  Mengambil repo tech/dev yang sedang naik daun di GitHub Trending (Daily/Weekly) untuk dijadikan materi konten.
+- **`tech-trend-hunter`**
+  Riset tambahan seputar rilis AI model, framework, atau tren teknologi terbaru di luar GitHub.
 
-| Skill | Purpose | Trigger |
-|-------|---------|---------|
-| `github-trending-hunter` | Scans GitHub Trending daily for dev/tech repos | Daily pipeline |
-| `caption-generator` | Generates anti-AI-slop captions with Gen Z voice | Daily pipeline, Auto-reply |
-| `zernio-poster` | Posts to Threads via Zernio API (media + caption) | Daily pipeline, Auto-reply |
-| `zernio-auto-reply` | Handles incoming comments webhook, generates replies | Hourly cron + webhook |
-| `humanizer-text` | Reference patterns only (NOT full rewrite) | Caption generation |
-| `tech-trend-hunter` | Researches new tech trends beyond GitHub | Weekly/Manual |
-| `content-strategy-agent` | Weekly content strategy review | Weekly cron |
+### 3. Content & Anti-Slop Generation
+- **`caption-generator`**
+  Membuat caption anti-AI-slop bergaya Gen Z + Corporate (menggunakan framework PAS/BAB/FAB & Unity Principle "kita/kitak").
+- **`humanizer-text`**
+  Referensi pola penulisan alami manusia (menghindari frasa robotik, emoji berlebihan, dan titik dua `:`) .
 
-### Anti-AI-Slop Rules (Embedded in `caption-generator`)
-- **NO** colons (`:`) in daily tech captions
-- **NO** hyphens/dashes (`-`) in daily tech captions (bullets `•` allowed in promo only)
-- **Max 1 emoji** per reply, ~30% chance
-- **Gen Z voice:** `gue/lu`, `bangettt`, `siiih`, `gokil`, `mantap`, `kocak`
-- **Anti-slop patterns:** no bullet points in daily, no template phrases ("senang membantu", "semoga bermanfaat")
-- **CTA:** Soft-sell only — "komen aja nanti gue spill detailnya"
-- **Output:** ONLY reply text, no formal openers/closers
+### 4. Publishing & Auto-Reply (Zernio API)
+- **`zernio-poster`**
+  Mengunggah gambar (presigned upload) dan mengirimkan postingan ke Threads via Zernio REST API (`POST /api/v1/posts`).
+- **`zernio-auto-reply`**
+  Menerima webhook komentar Threads dari Zernio, menyaring spam/bot, lalu menghasilkan balasan relevan secara otomatis.
+- **`zernio-webhook-management`**
+  Mengelola konfigurasi endpoint webhook dan signature verification.
 
-### Product Knowledge Base
-**Source:** `data/product-knowledge.md` (verified via web scraping pahlawandigital.com)
+---
 
-**Products:**
-1. **AdGen AI** — Visual AI (1 model + 1 product → thousands of ad variations) — Rp 29.000 promo
-2. **Adgen Pro** — Creative Engine (model + visual + script + voice-over) — Rp 59.000 promo
-3. **Ideasy + AdScale Lab** — Content ideas + Meta Ads Library analysis — Rp 249.000 promo
-4. **PersonaCore AI** — Buyer persona & funnel script — Rp 99.000 promo
-5. **Hero Kilat** — Landing page builder (Scalev/Lynk.id) — Rp 199.000 promo
+## 📁 Susunan Folder Project
 
-## ⏰ Cron Jobs
-
-### `post-holic-daily-3konten`
-- **Schedule:** `0 8 * * *` (08:00 WIB) → posts at 13:00 WIB
-- **Skills Loaded:** `post-holic-daily-pipeline`, `github-trending-hunter`, `caption-generator`, `zernio-poster`
-- **Output:** 2 tech repos + 1 promo product
-- **Retry Logic:** On failure (timeout/API error), retry 1 hour later
-- **Delivery:** `origin` (returns to this chat)
-
-### `zernio-comment-notify-hourly`
-- **Schedule:** `0 * * * *` (every hour)
-- **Skills Loaded:** `zernio-auto-reply`, `zernio-poster`
-- **Function:** Checks for new comments, processes via webhook logic
-- **Status:** Active
-
-## 🛠️ Setup & Installation
-
-### Prerequisites
-- Python 3.10+
-- Google Chrome / Chromium
-- GitHub CLI (`gh`) for repository management
-- Hermes Agent installed
-
-### Quick Start
-1. **Install Dependencies:**
-   ```bash
-   pip install playwright
-   playwright install chromium
-   ```
-
-2. **Hermes Profile Setup:**
-   ```bash
-   # Ensure profile 'post-holic' exists with skills loaded
-   hermes profile use post-holic
-   ```
-
-3. **Session Setup (CRITICAL):**
-   Since Meta uses strict bot detection, you MUST export your login session from a residential IP:
-   - Run session export script (refer to `storage_state.json` logic in autoreply/)
-   - Copy `storage_state.json` to project root
-
-4. **Configuration (`.env`):**
-   ```bash
-   ZERNIO_API_KEY=your_key
-   SERPAPI_API_KEY=your_key
-   FIRECRAWL_API_KEY=your_key
-   # Hermes will load these from profile config
-   ```
-
-## ⚠️ Critical Operational Notes
-
-- **Residential IP Required:** Write actions (replying, posting) MUST execute from residential IP. VPS/Cloud IPs are flagged/blocked by Meta.
-- **Anti-Bot Evasion:** Uses `navigator.webdriver = false` and Chromium flags to minimize detection.
-- **Human-Centric Content:** All captions follow strict "Anti-AI Slop" guidelines for high engagement.
-- **Two .env Files Must Sync:** `/root/autoreply/.env` (webhook service) and `post-holic/.env` (posting) — mismatch causes 401 on replies.
-- **Product Knowledge Verification:** All product claims must match `data/product-knowledge.md`. No hallucination allowed.
-
-## 📁 Project Structure
-```
-/
-├── autoreply/              # Webhook receiver, comment processor, Zernio integration
-│   ├── zernio_hermes_autoreply.py
-│   ├── check_new_comments.py
-│   └── .env (WEBHOOK SERVICE)
-├── data/                   # Logs, posted_repos.json, product-knowledge.md, media/
-├── .hermes/
-│   └── profiles/post-holic/
-│       ├── skills/         # post-holic, caption-generator, etc.
-│       ├── config.yaml
-│       └── .env (POSTING SERVICE)
-├── README.md               # This file
-└── ROADMAP.md
-```
-
-## 🔧 Skill Workflows
-
-### Daily Content Pipeline (`post-holic-daily-3konten`)
-```
-1. GitHub Trending Hunt → github-trending-hunter
-2. Select 2 tech repos + 1 promo product
-3. caption-generator → Generate anti-slop caption (Gen Z voice, no banned patterns)
-4. zernio-poster → Upload media + POST /api/v1/posts
-5. Save posted_repos.json, update promo-log.md
-```
-
-### Zernio Auto-Reply Flow
-```
-1. Webhook receives comment @dummythingsinside
-2. Filter: Skip own accounts, sensitive, OOC, spam, code requests
-3. Guardrails: Skip if too short without valid keyword
-4. Prompt Rules → Generate reply (Gen Z Override, anti-slop)
-5. Post-process: strip meta-text, confirm AI markers
-6. @dummythingsinside: AUTO REPLY → POST Zernio
-7. @butterrbutbetterr: MANUAL APPROVAL → Discord notification
-8. REPLY TERKIRIM KE THREADS
+```text
+/root/.hermes/profiles/post-holic/
+├── config.yaml                     # Config profile post-holic (API keys, active skills)
+├── .env                            # Key Zernio API, SerpAPI, Firecrawl
+│
+├── skills/                         # Direktori Modul / Skills Hermes
+│   ├── post-holic/                 # Skill Utama
+│   │   └── SKILL.md
+│   ├── copywriting/                # Generasi Caption & Style Guardrails
+│   │   └── caption-generator/
+│   │       └── SKILL.md
+│   ├── research/                   # Hunter Skill (GitHub & Tech Trends)
+│   │   ├── github-trending-hunter/
+│   │   │   └── SKILL.md
+│   │   └── tech-trend-hunter/
+│   │       └── SKILL.md
+│   └── social-media/               # Zernio Integration & Pipeline Skills
+│       ├── post-holic-daily-pipeline/
+│       │   └── SKILL.md
+│       ├── zernio-poster/
+│       │   └── SKILL.md
+│       ├── zernio-auto-reply/
+│       │   └── SKILL.md
+│       └── zernio-webhook-management/
+│           └── SKILL.md
+│
+├── autoreply/                      # Service Webhook Standalone (Python FastAPI/Flask)
+│   ├── zernio_hermes_autoreply.py   # Handler webhook komentar Zernio
+│   ├── auto_reply_worker.py        # Worker pemprosesan queue balasan
+│   ├── autoreply.db                # SQLite database log balasan
+│   └── .env                        # Mirroring env khusus webhook service
+│
+└── data/                           # Storage & Knowledge Base
+    ├── posted_repos.json           # Log repo agar tidak ter-post 2x
+    ├── product-knowledge.md        # Knowledge base Pahlawan Digital (AdGen, Ideasy, dll)
+    └── media/                      # Aset gambar promo/produk
 ```
 
 ---
 
-*Developed for the Mebiso ecosystem. Powered by Hermes Agent.*
+## 🔄 Alur Kerja Sistem (Workflow Pipeline)
+
+### 1. Pipeline Konten Harian (Cron: 08:00 WIB)
+```text
+[Cron Job] ──> github-trending-hunter
+                     │ (Filter repo tech/dev)
+                     ▼
+             caption-generator
+                     │ (Terapkan framework PAS/BAB/FAB, anti-AI-slop, link repo)
+                     ▼
+               zernio-poster
+                     │ (Upload gambar ke Zernio ──> POST /api/v1/posts)
+                     ▼
+             [Published di Threads] ──> Simpan ke data/posted_repos.json
+```
+
+### 2. Alur Auto-Reply Komentar (Real-Time Webhook)
+```text
+[Komentar di Threads]
+         │
+         ▼
+[Zernio Webhook] ──> /autoreply/zernio_hermes_autoreply.py
+                             │
+                             ├─► Cek Signature & Filter akun sendiri
+                             ├─► Cek Keyword Produk (AdGen, Ideasy, dll)
+                             ├─► Generate Balasan via LLM (Gen Z Voice, Tanpa Link di Main)
+                             │
+                             ▼
+                   zernio-poster (API Reply)
+                             │
+                             ▼
+                  [Balasan Terbit di Threads]
+```
+
+---
+
+## ⏰ Cron Jobs
+
+- **`post-holic-daily-3konten`**
+  - **Schedule:** `0 8 * * *` (Setiap jam 08:00 WIB)
+  - **Tugas:** Menjalankan pipeline 2 konten tech/repo + 1 konten promo produk.
+- **`zernio-comment-notify-hourly`**
+  - **Schedule:** `0 * * * *` (Setiap jam)
+  - **Tugas:** Memeriksa log balasan dan performa engagement.
+
+---
+
+*Powered by Hermes Agent profile `post-holic` & Zernio REST API.*
